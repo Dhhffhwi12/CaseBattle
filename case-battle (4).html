@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CASE BATTLE — Codely</title>
+<style>
+  :root{
+    --bg:#12121c; --panel:#1b1b2b; --panel2:#23233a; --line:#2e2e48;
+    --txt:#e8e8f5; --muted:#8a8aa8; --accent:#ff6a2b; --accent2:#ffb02e;
+    --blue:#3ba9ff; --green:#3ddc84;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",Roboto,system-ui,sans-serif;color:var(--txt);min-height:100vh;
+    background:radial-gradient(1200px 600px at 50% -10%, #20203a, transparent), var(--bg);}
+  header{display:flex;align-items:center;justify-content:space-between;
+    padding:14px 22px;background:linear-gradient(180deg,#191929,#15151f);
+    border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
+  .logo{font-weight:900;font-size:22px;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+  .logo b{color:#fff;background:var(--accent);padding:2px 8px;border-radius:6px}
+  nav{display:flex;gap:8px;flex-wrap:wrap}
+  nav button{background:transparent;border:none;color:var(--muted);font-weight:700;
+    padding:10px 16px;border-radius:10px;cursor:pointer;font-size:14px;transition:.15s}
+  nav button:hover{color:#fff;background:#ffffff10}
+  nav button.active{color:#fff;background:var(--accent)}
+  .balance{display:flex;align-items:center;gap:10px;font-weight:800}
+  .balance .coin{color:var(--accent2)}
+  .sound-btn{background:#ffffff14;border:1px solid var(--line);color:#fff;font-weight:800;
+    border-radius:8px;padding:6px 11px;cursor:pointer;font-size:15px;transition:.15s}
+  .sound-btn:hover{border-color:var(--accent)}
+  .sound-btn.muted{color:var(--muted);opacity:.7}
+  main{max-width:1280px;margin:0 auto;padding:24px 18px 80px}
+  h2.section{text-align:center;letter-spacing:3px;font-size:18px;margin:10px 0 24px;color:#cfcfe6}
+  .stat-line{text-align:center;color:var(--muted);font-size:13px;margin:-12px 0 20px}
+  .stat-line b{color:var(--accent2)}
+  .up-title{position:relative}
+  .gear-btn{position:absolute;right:0;top:50%;transform:translateY(-50%);background:#ffffff14;
+    border:1px solid var(--line);color:#fff;font-weight:800;border-radius:9px;padding:8px 14px;
+    cursor:pointer;font-size:12px;letter-spacing:0;transition:.15s}
+  .gear-btn:hover{border-color:var(--accent)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
+  .case{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
+    border-radius:14px;padding:16px;text-align:center;cursor:pointer;transition:.18s;position:relative;overflow:hidden}
+  .case:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 10px 30px #0008}
+  .case .name{font-weight:800;font-size:15px;margin-bottom:2px;min-height:36px;display:flex;align-items:center;justify-content:center}
+  .case .cnt{font-size:11px;color:var(--muted);margin-bottom:10px}
+  .case .img{font-size:54px;filter:drop-shadow(0 6px 14px #000a)}
+  .case .price{margin-top:12px;display:inline-block;border:1px solid var(--accent);
+    color:var(--accent2);font-weight:800;border-radius:8px;padding:6px 16px}
+  .case .tag{position:absolute;top:10px;right:10px;font-size:10px;font-weight:800;
+    background:var(--accent);padding:3px 7px;border-radius:6px}
+
+  /* ----- РОЗЫГРЫШИ ----- */
+  .raffles{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:22px}
+  .raffle{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
+    border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+  .rhead{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;font-weight:800;font-size:13px}
+  .rhead .rprice{font-size:15px}
+  .rbody{display:flex;gap:14px;padding:16px;align-items:center}
+  .rbody .rinfo{flex:1}
+  .rbody .rname{font-weight:800;font-size:16px}
+  .rbody .rsub{color:var(--muted);font-size:12px;margin-bottom:8px;text-transform:capitalize}
+  .rbody .rcond{font-size:12px;color:#cfcfe6;line-height:1.7}
+  .rbody .rcond b{color:var(--accent2)}
+  .rbody .remoji{font-size:64px;filter:drop-shadow(0 6px 14px #000a)}
+  .chance-badge{display:inline-block;font-weight:800;border-radius:7px;padding:2px 9px;font-size:12px}
+  .rprog{height:6px;background:#11111b;border-radius:6px;margin:0 16px;overflow:hidden}
+  .rprog i{display:block;height:100%;background:var(--green);width:0;transition:width 1s linear}
+  .rjoin{margin:14px 16px 18px;display:flex;justify-content:flex-end}
+  .rjoin button{background:#ffffff14;border:1px solid var(--line);color:#fff;border-radius:9px;
+    padding:11px 26px;font-weight:800;cursor:pointer;transition:.15s}
+  .rjoin button:hover:not(:disabled){border-color:var(--accent);color:#fff}
+  .rjoin button.joined{background:var(--green);color:#06210f;border-color:var(--green)}
+  .rjoin button:disabled{opacity:.55;cursor:not-allowed}
+  .winners{border-top:1px solid var(--line);padding:14px 16px 16px}
+  .winners .wt{display:flex;align-items:center;justify-content:center;gap:8px;color:#cfcfe6;
+    font-weight:800;letter-spacing:1px;margin-bottom:12px}
+  .wrow{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;padding:7px 0;
+    border-bottom:1px solid #ffffff08;font-size:12px}
+  .wrow .wav{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:#2a2a40;font-size:14px}
+  .wrow .wnick{font-weight:700}
+  .wrow .wskin{color:var(--muted);font-size:11px}
+  .wrow .wmeta{text-align:right}
+  .wrow .wtime{color:var(--muted);font-size:10px}
+  .wrow .wid{color:#5a5a78;font-size:10px;margin-left:6px}
+  .wrow .wval{color:var(--accent2);font-weight:800}
+
+  .overlay{position:fixed;inset:0;background:#0b0b12dd;backdrop-filter:blur(4px);
+    display:none;align-items:center;justify-content:center;z-index:100}
+  .overlay.show{display:flex}
+  .opener{width:min(940px,95vw);max-height:94vh;overflow:auto;background:var(--panel);border:1px solid var(--line);
+    border-radius:18px;padding:24px;text-align:center}
+  .opener h3{margin:0 0 4px;font-size:20px}
+  .opener .sub{color:var(--muted);font-size:13px;margin-bottom:14px}
+  .qty-row{display:flex;gap:8px;justify-content:center;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+  .qty-row span{color:var(--muted);font-weight:700;font-size:13px;margin-right:4px}
+  .qty-row button{background:#ffffff14;border:1px solid var(--line);color:#fff;border-radius:8px;
+    padding:8px 14px;font-weight:800;cursor:pointer}
+  .qty-row button.active{background:var(--accent);border-color:var(--accent)}
+  .reels{display:flex;flex-direction:column;gap:8px;margin:8px 0 14px}
+  .reel-wrap{position:relative;overflow:hidden;border-radius:12px;border:1px solid var(--line);
+    background:#11111b;height:150px}
+  .reel-wrap.multi{height:78px}
+  .reel-wrap:before,.reel-wrap:after{content:"";position:absolute;top:0;bottom:0;width:70px;z-index:3;pointer-events:none}
+  .reel-wrap:before{left:0;background:linear-gradient(90deg,#11111b,transparent)}
+  .reel-wrap:after{right:0;background:linear-gradient(-90deg,#11111b,transparent)}
+  .pointer{position:absolute;left:50%;top:0;bottom:0;width:3px;background:var(--accent);
+    transform:translateX(-50%);z-index:4;box-shadow:0 0 12px var(--accent)}
+  .reel{display:flex;height:100%;will-change:transform}
+  .slot{flex:0 0 122px;height:100%;margin:0 4px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;border-radius:10px;background:#191926;border-bottom:4px solid var(--line)}
+  .slot .emoji{font-size:38px}
+  .reel-wrap.multi .slot .emoji{font-size:26px}
+  .slot .sn{font-size:10px;color:var(--muted);margin-top:4px;max-width:112px;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .reel-wrap.multi .slot .sn{display:none}
+  .modal-actions{display:flex;gap:12px;justify-content:center;margin-top:6px;flex-wrap:wrap}
+  .btn{border:none;border-radius:10px;padding:12px 22px;font-weight:800;cursor:pointer;font-size:14px}
+  .btn.primary{background:var(--accent);color:#fff}
+  .btn.ghost{background:#ffffff14;color:#fff}
+  .btn.green{background:var(--green);color:#06210f}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .result-card{display:none;flex-direction:column;align-items:center;gap:10px;margin:6px 0 12px}
+  .result-card.show{display:flex}
+  .res-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-height:230px;overflow:auto;width:100%}
+  .ri{background:#191926;border:1px solid var(--line);border-radius:10px;padding:10px 8px;width:118px;text-align:center;position:relative}
+  .ri .e{font-size:32px}
+  .ri .n{font-size:10px;font-weight:700;margin:4px 0 2px;height:26px;overflow:hidden}
+  .ri .v{color:var(--accent2);font-weight:800;font-size:12px}
+  .ri .rb{position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:0 0 10px 10px}
+  .res-total{font-weight:800;font-size:16px}
+
+  .inv-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+  .item{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
+    border-radius:12px;padding:12px;text-align:center;position:relative;transition:.15s}
+  .item:hover{border-color:var(--accent)}
+  .item .emoji{font-size:40px}
+  .item .nm{font-size:12px;font-weight:700;margin:6px 0 2px;height:30px;display:flex;align-items:center;justify-content:center}
+  .item .val{color:var(--accent2);font-weight:800;font-size:13px}
+  .item .row{display:flex;gap:6px;margin-top:10px}
+  .item .row button{flex:1;border:none;border-radius:7px;padding:7px 0;font-weight:700;cursor:pointer;font-size:11px}
+  .sell-b{background:#ffffff14;color:#fff}
+  .up-b{background:var(--blue);color:#06192b}
+  .rarity-bar{position:absolute;left:0;right:0;bottom:0;height:4px;border-radius:0 0 12px 12px}
+  .empty{text-align:center;color:var(--muted);padding:60px 0}
+
+  .up-layout{display:grid;grid-template-columns:1fr 320px 1fr;gap:20px;align-items:start}
+  .up-box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;min-height:280px}
+  .up-box h4{margin:0 0 14px;text-align:center;font-size:14px;color:#cfcfe6}
+  .wheel-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;padding-top:6px}
+  .wheel{position:relative;width:240px;height:240px}
+  .wheel svg{position:absolute;inset:0;transform:rotate(-90deg)}
+  .wheel .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:7;pointer-events:none}
+  .wheel .chance{font-size:34px;font-weight:900}
+  .wheel .chance small{font-size:14px;color:var(--muted);font-weight:700}
+  .needle{position:absolute;left:50%;bottom:50%;width:4px;height:104px;background:var(--ndl,#fff);
+    transform-origin:50% 100%;transform:translateX(-50%) rotate(0deg);z-index:5;border-radius:3px}
+  .needle:after{content:"";position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+    border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:16px solid var(--ndl,#fff)}
+  .mults{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+  .mults button{background:#ffffff14;border:1px solid var(--line);color:#fff;border-radius:8px;
+    padding:8px 12px;font-weight:800;cursor:pointer;font-size:13px}
+  .mults button.active{background:var(--blue);color:#06192b;border-color:var(--blue)}
+  .quick-picks{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:2px}
+  .qpk{background:#ffffff10;border:1px solid var(--line);color:#cfcfe6;border-radius:8px;
+    padding:6px 12px;font-weight:800;cursor:pointer;font-size:12px;transition:.12s}
+  .qpk.coef{color:var(--blue)}
+  .qpk.pct{color:var(--green)}
+  .qpk:hover{border-color:var(--accent)}
+  .pick-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;max-height:330px;overflow:auto}
+  .pick{background:#191926;border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center;cursor:pointer;font-size:11px;transition:.12s;position:relative}
+  .pick:hover{border-color:var(--accent)}
+  .pick.sel{border-color:var(--green);background:#16241c}
+  .pick .e{font-size:26px}
+  .pick .v{color:var(--accent2);font-weight:800;margin-top:2px}
+  .target .pick.sel{border-color:var(--blue);background:#142435}
+  .up-info{text-align:center;color:var(--muted);font-size:13px;margin-top:10px;line-height:1.6}
+
+  /* ----- НАСТРОЙКИ ----- */
+  .settings{width:min(560px,95vw);max-height:94vh;overflow:auto;background:#15151f;
+    border:1px solid var(--line);border-radius:14px}
+  .set-head{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;
+    border-bottom:1px solid var(--line);font-weight:900;font-size:18px;letter-spacing:1px}
+  .set-head .gear{color:var(--accent2)}
+  .set-head button{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
+  .set-body{padding:4px 22px 10px}
+  .set-sec{padding:18px 0;border-bottom:1px solid #ffffff0d}
+  .set-sec h4{margin:0 0 4px;font-size:16px;color:#fff}
+  .set-sec p.desc{margin:0 0 12px;color:var(--muted);font-size:12px;line-height:1.5}
+  .set-sec p.warn{color:#ff7a4d}
+  .opt{display:flex;gap:11px;padding:8px 0;cursor:pointer;align-items:flex-start}
+  .radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--muted);flex:0 0 18px;margin-top:1px;position:relative}
+  .opt.sel .radio,.needle-opt.sel .radio{border-color:var(--accent)}
+  .opt.sel .radio:after,.needle-opt.sel .radio:after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--accent)}
+  .opt .otext b{font-size:13px}
+  .opt .otext span{display:block;color:var(--muted);font-size:11px;margin-top:3px;line-height:1.5}
+  .needles{display:flex;gap:30px;align-items:flex-end;margin:6px 0 8px;flex-wrap:wrap}
+  .needle-opt{display:flex;flex-direction:column;align-items:center;gap:12px;cursor:pointer}
+  .needle-prev{width:6px;height:34px;border-radius:3px;background:var(--c);position:relative}
+  .needle-prev:before{content:"";position:absolute;top:-9px;left:50%;transform:translateX(-50%);
+    border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:12px solid var(--c)}
+  .needle-opt.disabled{opacity:.35;pointer-events:none}
+  .qs-row{display:flex;gap:22px;flex-wrap:wrap}
+  .qs-col{flex:1;min-width:200px}
+  .qs-col .lbl{color:var(--muted);font-size:12px;margin-bottom:8px}
+  .qs-btns{display:flex;gap:8px}
+  .qsf{flex:1;background:#191926;border:1px solid var(--line);border-radius:8px;padding:8px 6px;
+    display:flex;align-items:center;justify-content:center;gap:3px;font-weight:800;color:#fff}
+  .qsf span{color:var(--muted);font-size:12px}
+  .qsf input{width:42px;background:none;border:none;color:#fff;font-weight:800;font-size:14px;text-align:center;outline:none}
+  .qsf input::-webkit-outer-spin-button,.qsf input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .set-save{display:block;margin:6px auto 22px;background:var(--accent);color:#fff;border:none;
+    border-radius:9px;padding:12px 26px;font-weight:800;cursor:pointer;font-size:13px;letter-spacing:1px}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120%);
+    background:#222238;border:1px solid var(--line);color:#fff;padding:12px 20px;border-radius:10px;
+    font-weight:700;z-index:200;transition:.3s;box-shadow:0 8px 30px #000a}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .toast.win{border-color:var(--green)}
+  .toast.lose{border-color:#ff4d4d}
+  .hidden{display:none!important}
+  @media(max-width:820px){.up-layout{grid-template-columns:1fr}.wheel{width:200px;height:200px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">CASE <b>7</b> BATTLE</div>
+  <nav>
+    <button data-tab="cases" class="active">КЕЙСЫ</button>
+    <button data-tab="upgrade">АПГРЕЙД</button>
+    <button data-tab="contests">РОЗЫГРЫШИ</button>
+    <button data-tab="inventory">ИНВЕНТАРЬ</button>
+  </nav>
+  <div class="balance">
+    <button class="sound-btn" id="soundBtn" title="Звук вкл/выкл">🔊</button>
+    <span class="coin">💰</span>
+    <span id="balance">5 000</span> ₽
+  </div>
+</header>
+
+<main>
+  <section id="tab-cases">
+    <h2 class="section">У НАС ВЫИГРЫВАЮТ</h2>
+    <div class="grid" id="casesGrid"></div>
+  </section>
+
+  <section id="tab-contests" class="hidden">
+    <h2 class="section">РОЗЫГРЫШИ</h2>
+    <div class="stat-line">Открыто кейсов: <b id="openedStat">0</b></div>
+    <div class="raffles" id="rafflesGrid"></div>
+  </section>
+
+  <section id="tab-inventory" class="hidden">
+    <div class="inv-head">
+      <h2 class="section" style="margin:0">МОИ ПРЕДМЕТЫ (<span id="invCount">0</span>)</h2>
+      <button class="btn ghost" id="sellAll">Продать всё</button>
+    </div>
+    <div class="grid" id="invGrid"></div>
+    <div class="empty hidden" id="invEmpty">Инвентарь пуст. Откройте любой кейс!</div>
+  </section>
+
+  <section id="tab-upgrade" class="hidden">
+    <h2 class="section up-title">МОДЕРНИЗАЦИЯ ОРУЖИЯ 2.0
+      <button class="gear-btn" id="openSettings">⚙️ Настройки</button>
+    </h2>
+    <div class="up-layout">
+      <div class="up-box">
+        <h4>ВЫБЕРИТЕ ПРЕДМЕТ ИЗ ИНВЕНТАРЯ</h4>
+        <div class="pick-list" id="upInv"></div>
+      </div>
+      <div class="up-box">
+        <div class="wheel-wrap">
+          <div class="wheel">
+            <svg width="240" height="240" viewBox="0 0 240 240">
+              <circle id="wheelBg" cx="120" cy="120" r="104" fill="none" stroke="#2e2e48" stroke-width="18"/>
+              <circle id="wheelArc" cx="120" cy="120" r="104" fill="none" stroke="#3ddc84"
+                stroke-width="18" stroke-dasharray="653" stroke-dashoffset="653" stroke-linecap="butt"/>
+            </svg>
+            <div class="needle" id="needle"></div>
+            <div class="center">
+              <div class="chance"><span id="chanceVal">0</span><small>%</small></div>
+              <div style="color:var(--muted);font-size:11px">шанс успеха</div>
+            </div>
+          </div>
+          <div class="mults" id="mults">
+            <button data-m="1.5">x1.5</button>
+            <button data-m="2">x2</button>
+            <button data-m="3">x3</button>
+            <button data-m="5">x5</button>
+            <button data-m="10">x10</button>
+            <button data-m="20">x20</button>
+          </div>
+          <div class="quick-picks" id="quickPicks"></div>
+          <button class="btn primary" id="doUpgrade" disabled>ПРОКАЧАТЬ</button>
+          <div class="up-info" id="upInfo">Выберите предмет и множитель</div>
+        </div>
+      </div>
+      <div class="up-box target">
+        <h4>ЦЕЛЕВОЙ ПРЕДМЕТ</h4>
+        <div class="pick-list" id="upTargets"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ОКНО ОТКРЫТИЯ КЕЙСА -->
+<div class="overlay" id="overlay">
+  <div class="opener">
+    <h3 id="opTitle">Кейс</h3>
+    <div class="sub" id="opSub"></div>
+    <div class="qty-row" id="qtyRow">
+      <span>Кол-во:</span>
+      <button data-q="1" class="active">1</button>
+      <button data-q="2">2</button>
+      <button data-q="3">3</button>
+      <button data-q="5">5</button>
+      <button data-q="10">10</button>
+    </div>
+    <div class="reels" id="reels"></div>
+    <div class="result-card" id="resultCard">
+      <div class="res-grid" id="resGrid"></div>
+      <div class="res-total" id="resTotal"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn primary" id="spinBtn">Открыть</button>
+      <button class="btn green hidden" id="keepBtn">Забрать всё</button>
+      <button class="btn ghost hidden" id="sellNowBtn">Продать всё</button>
+      <button class="btn ghost" id="closeBtn">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<!-- ОКНО НАСТРОЕК -->
+<div class="overlay" id="setOverlay">
+  <div class="settings">
+    <div class="set-head"><span class="gear">⚙️ НАСТРОЙКИ</span><button id="setClose">✕</button></div>
+    <div class="set-body">
+
+      <div class="set-sec" id="grpDesign">
+        <h4>Дизайн "круга" с шансами</h4>
+        <p class="desc">Вы можете выбрать различный дизайн для центрального круга с шансами:</p>
+        <div class="opt" data-val="v1">
+          <div class="radio"></div>
+          <div class="otext"><b>v.1 Старый дизайн</b><span>Наша изначальная версия круга с шансами.</span></div>
+        </div>
+        <div class="opt sel" data-val="v2">
+          <div class="radio"></div>
+          <div class="otext"><b>v.2 Новый дизайн</b><span>Значение по умолчанию. Новое исполнение в виде бублика. Только для этого дизайна доступна кастомизация стрелки.</span></div>
+        </div>
+      </div>
+
+      <div class="set-sec" id="grpNeedle">
+        <h4>Тип стрелки</h4>
+        <p class="desc">Вы можете выбрать внешний вид вращающейся стрелки, указывающей на шансы:</p>
+        <div class="needles">
+          <div class="needle-opt" data-idx="0"><div class="needle-prev" style="--c:#ffb02e"></div><div class="radio"></div></div>
+          <div class="needle-opt" data-idx="1"><div class="needle-prev" style="--c:#ff6a2b"></div><div class="radio"></div></div>
+          <div class="needle-opt" data-idx="2"><div class="needle-prev" style="--c:#eb4b4b"></div><div class="radio"></div></div>
+          <div class="needle-opt" data-idx="3"><div class="needle-prev" style="--c:#3ddc84"></div><div class="radio"></div></div>
+          <div class="needle-opt sel" data-idx="4"><div class="needle-prev" style="--c:#7CFC4D"></div><div class="radio"></div></div>
+        </div>
+      </div>
+
+      <div class="set-sec">
+        <h4>Быстрый подбор</h4>
+        <div class="qs-row">
+          <div class="qs-col">
+            <div class="lbl">Настройте кнопки для быстрого подбора по коэффициенту:</div>
+            <div class="qs-btns">
+              <div class="qsf"><span>x</span><input id="qc0" type="number" min="1" value="2"></div>
+              <div class="qsf"><span>x</span><input id="qc1" type="number" min="1" value="5"></div>
+              <div class="qsf"><span>x</span><input id="qc2" type="number" min="1" value="10"></div>
+            </div>
+          </div>
+          <div class="qs-col">
+            <div class="lbl">Настройте кнопки для быстрого подбора по проценту:</div>
+            <div class="qs-btns">
+              <div class="qsf"><input id="qp0" type="number" min="1" max="95" value="30"><span>%</span></div>
+              <div class="qsf"><input id="qp1" type="number" min="1" max="95" value="50"><span>%</span></div>
+              <div class="qsf"><input id="qp2" type="number" min="1" max="95" value="75"><span>%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="set-sec" id="grpScroll">
+        <h4>Тип прокрутки</h4>
+        <p class="desc warn">Выбор версии никак не повлияет на шансы. Это просто настройка анимации.</p>
+        <div class="opt sel" data-val="v1">
+          <div class="radio"></div>
+          <div class="otext"><b>v.1 Обычная</b><span>Наша изначальная прокрутка. Предсказуемо крутится и в целом не интересна.</span></div>
+        </div>
+        <div class="opt" data-val="v2">
+          <div class="radio"></div>
+          <div class="otext"><b>v.2 Азартная</b><span>Чуть более длительная по времени, но с ней никогда не угадаешь — выиграли вы или проиграли.</span></div>
+        </div>
+      </div>
+
+      <div class="set-sec" id="grpSound">
+        <h4>Звук в апгрейде</h4>
+        <div class="opt sel" data-val="true">
+          <div class="radio"></div>
+          <div class="otext"><b>Включён</b><span>Значение по умолчанию. Звуковые эффекты (нажатия, щелчки анимации и финальные овации) включены.</span></div>
+        </div>
+        <div class="opt" data-val="false">
+          <div class="radio"></div>
+          <div class="otext"><b>Выключен</b><span>Звуковые эффекты в апгрейде больше не доносятся до вашего чуткого слуха.</span></div>
+        </div>
+      </div>
+
+      <button class="set-save" id="setSave">СОХРАНИТЬ И ЗАКРЫТЬ ОКНО</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- SOUND ---------- */
+const Sound = {
+  ctx: null, muted: false, tickTimer: null,
+  init(){
+    if(!this.ctx){
+      try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch(e){ this.ctx = null; }
+    }
+    if(this.ctx && this.ctx.state === "suspended") this.ctx.resume();
+  },
+  beep(freq, dur, type="square", vol=0.15){
+    if(this.muted || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t);
+    gain.gain.setValueAtTime(vol, t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(gain); gain.connect(this.ctx.destination);
+    osc.start(t); osc.stop(t + dur);
+  },
+  tick(){ this.beep(1100 + Math.random() * 180, 0.045, "square", 0.08); },
+  startTicks(duration){
+    if(this.muted || !this.ctx) return;
+    this.stopTicks();
+    const start = performance.now();
+    const self = this;
+    function next(){
+      const p = (performance.now() - start) / duration;
+      if(p >= 1){ self.tickTimer = null; return; }
+      self.tick();
+      const delay = 55 + p * p * 360;
+      self.tickTimer = setTimeout(next, delay);
+    }
+    next();
+  },
+  stopTicks(){ if(this.tickTimer){ clearTimeout(this.tickTimer); this.tickTimer = null; } },
+  win(){ if(this.muted || !this.ctx) return;
+    [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => this.beep(f, 0.18, "triangle", 0.16), i * 90)); },
+  bigWin(){ if(this.muted || !this.ctx) return;
+    [523, 659, 784, 1047, 1319, 1568].forEach((f, i) => setTimeout(() => this.beep(f, 0.22, "triangle", 0.18), i * 90)); },
+  lose(){ if(this.muted || !this.ctx) return;
+    [392, 311, 247].forEach((f, i) => setTimeout(() => this.beep(f, 0.25, "sawtooth", 0.13), i * 120)); },
+  coin(){ this.beep(880, 0.08, "square", 0.12); setTimeout(() => this.beep(1320, 0.10, "square", 0.12), 70); }
+};
+
+/* ---------- UPGRADE SETTINGS ---------- */
+const NEEDLE_COLORS = ["#ffb02e", "#ff6a2b", "#eb4b4b", "#3ddc84", "#7CFC4D"];
+const upSettings = {
+  wheelDesign: "v2",
+  needleType: 4,
+  quickCoef: [2, 5, 10],
+  quickPct: [30, 50, 75],
+  scrollType: "v1",
+  sound: true
+};
+function upBeep(method){ if(upSettings.sound) Sound[method](); }
+function upTicks(ms){ if(upSettings.sound) Sound.startTicks(ms); }
+
+/* ---------- DATA ---------- */
+const rarities = {
+  common:     {color:"#7a8a9a"},
+  uncommon:   {color:"#4b69ff"},
+  rare:       {color:"#8847ff"},
+  mythical:   {color:"#d32ce6"},
+  legendary:  {color:"#eb4b4b"},
+  exceedingly:{color:"#ffd700"},
+  contraband: {color:"#ff8000"},
+  ancient:    {color:"#e4ae39"},
+  immortal:   {color:"#ff3b9a"}
+};
+
+// [name, emoji, rarity, baseValue]
+const SKINS = [
+  ["P250 | Песок","🔫","common",8],
+  ["MP9 | Бегом за латте","🔫","common",14],
+  ["Nova | Граффити","🔫","common",11],
+  ["Tec-9 | Песчаная буря","🔫","common",9],
+  ["Glock-18 | Ночь","🔫","common",18],
+  ["SCAR-20 | Грунт","🔫","common",22],
+  ["FAMAS | Колумбийцы","🔫","common",27],
+  ["MP5-SD | Лесной DDPAT","🔫","common",16],
+
+  ["MAC-10 | Клочья","🔫","uncommon",45],
+  ["Glock-18 | Дух воды","🔫","uncommon",60],
+  ["USP-S | Следы асфальта","🔫","uncommon",75],
+  ["P2000 | Огненная элита","🔫","uncommon",50],
+  ["Five-SeveN | Случай","🔫","uncommon",90],
+  ["MP7 | Нексус","🔫","uncommon",110],
+  ["AUG | Сирокко","🔫","uncommon",125],
+  ["P90 | Пепельный лес","🔫","uncommon",70],
+
+  ["Galil AR | Цербер","🔫","rare",140],
+  ["AK-47 | Сафари","🔫","rare",160],
+  ["Desert Eagle | Бронзовая дека","🔫","rare",185],
+  ["M4A1-S | Василиск","🔫","rare",230],
+  ["AWP | Ледяной уголь","🎯","rare",310],
+  ["SSG 08 | Кровь в воде","🎯","rare",360],
+  ["M4A4 | Вой шёпотом","🔫","rare",420],
+  ["USP-S | Неонуар","🔫","rare",260],
+
+  ["USP-S | Кайтен","🔫","mythical",470],
+  ["AK-47 | Легион Анубиса","🔫","mythical",520],
+  ["M4A4 | Адок","🔫","mythical",680],
+  ["AWP | Распад","🎯","mythical",760],
+  ["Desert Eagle | Пламя","🔫","mythical",900],
+  ["Glock-18 | Градиент (BS)","🔫","mythical",990],
+
+  ["AWP | Гидра","🎯","legendary",1250],
+  ["AK-47 | Огненный змей","🔫","legendary",1800],
+  ["M4A4 | Император","🔫","legendary",2200],
+  ["AK-47 | Вулкан","🔫","legendary",2600],
+  ["AWP | Медуза","🎯","legendary",3200],
+  ["M4A1-S | Раскол","🔫","legendary",3800],
+
+  ["★ Перчатки | Пандора","🧤","exceedingly",4200],
+  ["★ Штык-нож | Автотроника","🔪","exceedingly",5200],
+  ["★ Керамбит | Кровавая паутина","🗡️","exceedingly",6500],
+  ["CZ75-Auto | Изумрудный кварц","🔫","exceedingly",6999],
+  ["★ Нож Боуи | Автотроника","🔪","exceedingly",7259],
+  ["★ Перчатки | Семь оттенков","🧤","exceedingly",7800],
+  ["★ Нож-бабочка | Закалка","🔪","exceedingly",9000],
+  ["AK-47 | Топливный инжектор","🔫","exceedingly",9400],
+  ["★ Штык-нож | Северный лес","🔪","exceedingly",11000],
+  ["★ Керамбит | Драгоценный","🗡️","exceedingly",12000],
+  ["★ Фальшион | Зуб тигра","🔪","exceedingly",13286],
+  ["★ Штык-нож | Ручная роспись","🔪","exceedingly",15287],
+  ["★ Нож-бабочка | Мраморный градиент","🔪","exceedingly",16000],
+
+  ["★ Охотничий нож | Гамма-волны","🔪","contraband",19000],
+  ["★ Керамбит | Изумрудная паутина","🗡️","contraband",22000],
+  ["★ Нож Боуи | Волны","🔪","contraband",23000],
+  ["★ Спортивные перчатки | Порок","🧤","contraband",23413],
+  ["★ Нож «Бродяга» | Градиент","🔪","contraband",25785],
+  ["★ StatTrak™ Нож Боуи | Градиент","🔪","contraband",25984],
+  ["AWP | Драконий огонь","🎯","contraband",28000],
+  ["★ Керамбит | Северный лес","🗡️","contraband",34345],
+  ["★ M9 Штык | Легенды","🔪","contraband",35000],
+  ["M4A1-S | Падение Икара","🔫","contraband",48500],
+  ["★ Керамбит | Поверхностная закалка","🗡️","contraband",55000],
+  ["★ StatTrak™ Керамбит | Автотроника","🗡️","contraband",69901],
+  ["★ Керамбит | Сапфир","🗡️","contraband",75000],
+  ["★ Нож-бабочка | Сапфир","🔪","contraband",90000],
+
+  ["★ Штык-нож M9 | Гамма-волны","🔪","ancient",106000],
+  ["★ Перчатки спецназа | Кровавое кимоно","🧤","ancient",116387],
+  ["★ Керамбит | Рубин","🗡️","ancient",130000],
+  ["StatTrak™ AK-47 | Огненный змей","🔫","ancient",133719],
+  ["★ StatTrak™ Керамбит | Градиент","🗡️","ancient",160000],
+  ["Glock-18 | Градиент","🔫","ancient",164662],
+  ["★ StatTrak™ Керамбит | Gamma Doppler","🗡️","ancient",177660],
+  ["AWP | Принц","🎯","ancient",179000],
+  ["★ Нож-бабочка | Изумруд","🔪","ancient",180000],
+  ["★ StatTrak™ Нож-бабочка | Волны","🔪","ancient",205796],
+  ["AWP | Сделано в небесах","🎯","ancient",250000],
+  ["★ Перчатки | Феникс","🧤","ancient",320000],
+  ["★ M9 Штык | Чёрный жемчуг","🔪","ancient",450000],
+
+  ["★ Керамбит | Чистый изумруд","🗡️","immortal",600000],
+  ["★ Нож-бабочка | Кристальный","🔪","immortal",850000],
+  ["AWP | Сон дракона","🎯","immortal",1000000],
+  ["★ Корона Императора","👑","immortal",1500000]
+];
+const WEIGHTS = {
+  common:55, uncommon:25, rare:12, mythical:5, legendary:2.5,
+  exceedingly:0.5, contraband:0.12, ancient:0.03, immortal:0.008
+};
+
+function caseBand(price){
+  return { min: Math.max(5, Math.round(price * 0.2)), max: Math.round(price * 15) };
+}
+
+const RAW_CASES = [
+  ["ЛЕОН КЕННЕДИ","🧟",39,38,"NEW"],
+  ["ГРЕЙС ЭШКРОФТ","🔪",119,37],
+  ["ВИКТОР ГИДЕОН","🧪",359,39],
+  ["RACOON CORPORATION","🏢",899,37],
+  ["RESIDENT EVIL REQUIEM","🧟",2699,38,"HOT"],
+  ["ХЬЮИ КЭМПБЕЛЛ","🦸",55,41],
+  ["ФРАНЦУЗИК","🥖",111,40],
+  ["СОЛДАТИК","🎖️",444,42],
+  ["ХОУМЛЕНДЕР","🦸",999,41],
+  ["ПАЦАНЫ","💥",4444,44,"HOT"],
+  ["НИНДЗЯ","🥷",69,40],
+  ["САМУРАЙ","⚔️",169,40],
+  ["РОНИН","🗡️",299,40],
+  ["СЁГУН","🏯",699,41],
+  ["ИМПЕРАТОР","👑",1999,39],
+  ["НОЖИ ГРАДИЕНТ","🌈",1499,40,"NEW"],
+  ["ПЕРЧАТКИ PRO","🧤",2299,41],
+  ["КЕРАМБИТ КЛАБ","🗡️",3499,42,"HOT"],
+  ["БОУИ И ФАЛЬШИОН","🔪",1299,40],
+  ["ГАММА-ВОЛНЫ","🌊",3999,43],
+  ["АВТОТРОНИКА","⚙️",2999,41],
+  ["ДРАКОН","🐲",5499,43,"HOT"],
+  ["ИЗУМРУД","💚",6999,44],
+  ["ЛЕГЕНДЫ CS","🏆",9999,45,"HOT"],
+  ["САПФИР","💎",14999,44],
+  ["РУБИН","❤️",24999,45,"HOT"],
+  ["БОЖЕСТВЕННЫЙ","✨",49999,46,"TOP"]
+];
+const CASES = RAW_CASES.map(c => ({
+  name:c[0], emoji:c[1], price:c[2], items:c[3], tag:c[4], band:caseBand(c[2])
+}));
+
+/* ---------- STATE ---------- */
+let balance = 5000;
+let inventory = [];
+let uid = 1;
+let casesOpened = 0;
+
+/* ---------- HELPERS ---------- */
+const $  = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const fmt = n => Math.round(n).toLocaleString("ru-RU");
+function setBalance(v){ balance = Math.max(0, v); $("#balance").textContent = fmt(balance); }
+function toast(msg, type=""){
+  const t = $("#toast");
+  t.textContent = msg;
+  t.className = "toast show " + type;
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = "toast", 2400);
+}
+
+function randomSkinFor(caseObj){
+  const min = caseObj.band.min, max = caseObj.band.max;
+  let pool = SKINS.filter(s => s[3] >= min && s[3] <= max);
+  if(!pool.length) pool = SKINS.slice();
+  const wpool = pool.map(s => [s, WEIGHTS[s[2]]]);
+  const total = wpool.reduce((a, b) => a + b[1], 0);
+  let r = Math.random() * total;
+  let chosen = wpool[0][0];
+  for(const [s, w] of wpool){ if((r -= w) <= 0){ chosen = s; break; } }
+  const value = Math.round(chosen[3] * (0.85 + Math.random() * 0.3));
+  return {id: uid++, name:chosen[0], emoji:chosen[1], rarity:chosen[2], value};
+}
+
+/* ---------- SOUND TOGGLE ---------- */
+$("#soundBtn").onclick = () => {
+  Sound.init();
+  Sound.muted = !Sound.muted;
+  const btn = $("#soundBtn");
+  if(Sound.muted){
+    Sound.stopTicks();
+    btn.textContent = "🔇"; btn.classList.add("muted");
+    toast("Звук выключен");
+  } else {
+    btn.textContent = "🔊"; btn.classList.remove("muted");
+    Sound.coin(); toast("Звук включён");
+  }
+};
+document.addEventListener("click", () => Sound.init(), {once:true});
+
+/* ---------- TABS ---------- */
+$$("nav button").forEach(b => b.onclick = () => {
+  $$("nav button").forEach(x => x.classList.remove("active"));
+  b.classList.add("active");
+  ["cases","upgrade","contests","inventory"].forEach(t => $("#tab-" + t).classList.add("hidden"));
+  $("#tab-" + b.dataset.tab).classList.remove("hidden");
+  if(b.dataset.tab === "inventory") renderInventory();
+  if(b.dataset.tab === "upgrade") renderUpgrade();
+  if(b.dataset.tab === "contests") renderRaffles();
+});
+
+/* ---------- CASES ---------- */
+function renderCases(){
+  const g = $("#casesGrid");
+  g.innerHTML = "";
+  CASES.forEach((c, i) => {
+    const el = document.createElement("div");
+    el.className = "case";
+    el.innerHTML =
+      (c.tag ? `<div class="tag">${c.tag}</div>` : "") +
+      `<div class="name">${c.name}</div>
+       <div class="cnt">${c.items} предметов</div>
+       <div class="img">${c.emoji}</div>
+       <div class="price">${fmt(c.price)} ₽</div>`;
+    el.onclick = () => openCaseModal(i);
+    g.appendChild(el);
+  });
+}
+
+/* ---------- OPENING ---------- */
+let currentCase = null, currentWins = [], spinning = false, openQty = 1;
+const SLOT_W = 122 + 8;
+
+function openCaseModal(i){
+  currentCase = CASES[i];
+  currentWins = [];
+  spinning = false;
+  $("#opTitle").textContent = currentCase.name;
+  $("#resultCard").classList.remove("show");
+  $("#resGrid").innerHTML = "";
+  $("#resTotal").textContent = "";
+  $("#qtyRow").classList.remove("hidden");
+  $("#spinBtn").classList.remove("hidden");
+  $("#spinBtn").disabled = false;
+  $("#keepBtn").classList.add("hidden");
+  $("#sellNowBtn").classList.add("hidden");
+  updateSpinLabel();
+  buildReels(openQty, true);
+  $("#overlay").classList.add("show");
+}
+function updateSpinLabel(){
+  $("#opSub").textContent = "Цена: " + fmt(currentCase.price) + " ₽ за кейс";
+  $("#spinBtn").textContent = "Открыть " + openQty + " за " + fmt(currentCase.price * openQty) + " ₽";
+}
+$("#qtyRow").querySelectorAll("button").forEach(b => {
+  b.onclick = () => {
+    if(spinning) return;
+    $("#qtyRow").querySelectorAll("button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    openQty = parseInt(b.dataset.q);
+    updateSpinLabel();
+    buildReels(openQty, true);
+  };
+});
+function buildReels(qty, preview){
+  const wrap = $("#reels");
+  wrap.innerHTML = "";
+  for(let r = 0; r < qty; r++){
+    const rw = document.createElement("div");
+    rw.className = "reel-wrap" + (qty > 1 ? " multi" : "");
+    rw.innerHTML = '<div class="pointer"></div><div class="reel"></div>';
+    wrap.appendChild(rw);
+    if(preview){
+      const reel = rw.querySelector(".reel");
+      for(let k = 0; k < 14; k++) reel.appendChild(slotEl(randomSkinFor(currentCase)));
+    }
+  }
+}
+function slotEl(s){
+  const d = document.createElement("div");
+  d.className = "slot";
+  d.style.borderBottomColor = rarities[s.rarity].color;
+  d.innerHTML = `<div class="emoji">${s.emoji}</div><div class="sn">${s.name}</div>`;
+  return d;
+}
+$("#spinBtn").onclick = () => {
+  if(spinning) return;
+  const cost = currentCase.price * openQty;
+  if(balance < cost){ toast("Недостаточно средств!", "lose"); return; }
+  Sound.init();
+  setBalance(balance - cost);
+  spinning = true;
+  $("#spinBtn").disabled = true;
+  $("#qtyRow").classList.add("hidden");
+  buildReels(openQty, false);
+  currentWins = [];
+  const rows = $$("#reels .reel-wrap");
+  const total = 60, winIndex = 52;
+  const wrapW = rows[0].clientWidth;
+  rows.forEach(rw => {
+    const reel = rw.querySelector(".reel");
+    reel.style.transition = "none";
+    reel.style.transform = "translateX(0)";
+    const items = [];
+    for(let k = 0; k < total; k++) items.push(randomSkinFor(currentCase));
+    const win = randomSkinFor(currentCase);
+    items[winIndex] = win;
+    currentWins.push(win);
+    items.forEach(s => reel.appendChild(slotEl(s)));
+    const offset = winIndex * SLOT_W - wrapW / 2 + SLOT_W / 2 + (Math.random() * 30 - 15);
+    requestAnimationFrame(() => {
+      reel.style.transition = "transform 4.8s cubic-bezier(.12,.62,.13,1)";
+      reel.style.transform = `translateX(${-offset}px)`;
+    });
+  });
+  Sound.startTicks(4800);
+  casesOpened += openQty;
+  $("#openedStat").textContent = casesOpened;
+  setTimeout(showResults, 5000);
+};
+function showResults(){
+  spinning = false;
+  Sound.stopTicks();
+  const grid = $("#resGrid");
+  grid.innerHTML = "";
+  let total = 0, best = 0;
+  currentWins.forEach(s => {
+    total += s.value;
+    if(s.value > best) best = s.value;
+    const d = document.createElement("div");
+    d.className = "ri";
+    d.innerHTML =
+      `<div class="e">${s.emoji}</div>
+       <div class="n" style="color:${rarities[s.rarity].color}">${s.name}</div>
+       <div class="v">${fmt(s.value)} ₽</div>
+       <div class="rb" style="background:${rarities[s.rarity].color}"></div>`;
+    grid.appendChild(d);
+  });
+  $("#resTotal").textContent = "Итого: " + fmt(total) + " ₽";
+  $("#resultCard").classList.add("show");
+  $("#spinBtn").classList.add("hidden");
+  $("#keepBtn").classList.remove("hidden");
+  $("#sellNowBtn").classList.remove("hidden");
+  $("#sellNowBtn").textContent = "Продать всё за " + fmt(total) + " ₽";
+  if(best >= 5000) Sound.bigWin(); else Sound.win();
+}
+$("#keepBtn").onclick = () => {
+  currentWins.forEach(s => inventory.push(s));
+  Sound.coin();
+  toast(currentWins.length + " предмет(ов) в инвентаре", "win");
+  reopenSame();
+};
+$("#sellNowBtn").onclick = () => {
+  const sum = currentWins.reduce((a, b) => a + b.value, 0);
+  setBalance(balance + sum);
+  Sound.coin();
+  toast("Продано за " + fmt(sum) + " ₽", "win");
+  reopenSame();
+};
+function reopenSame(){ openCaseModal(CASES.indexOf(currentCase)); }
+$("#closeBtn").onclick = () => { if(!spinning){ Sound.stopTicks(); $("#overlay").classList.remove("show"); } };
+
+/* ---------- РОЗЫГРЫШИ ---------- */
+const NICKS = ["Big love","Corinan29011","mellstroy","awerstone","Amar1n","Aros1iK","Koko","shiza",
+  "DARK","Супирвася","maxutka","kyzuke666","AJDAHA","persyanov","shlang.gg","NoMercy","w4ck",
+  "zorqx","Lucky7","kotik","NeoN","Phantom","drainer","saske","milana","trupik","Zeus","frost",
+  "viper","Skeleton","jokerr","wmask","craftik","p1nk","oblivion"];
+const AVATARS = ["😎","🤑","👾","🐲","🦊","🐺","💀","🤖","👽","🧊","🔥","⚡","🌟","🎮","🦅","🐉"];
+
+const RAFFLE_DEFS = [
+  ["Розыгрыш каждые 5 минут",  "#3ddc84", 300,   200,    1500,   1,   0.30],
+  ["Розыгрыш каждые 15 минут", "#3ba9ff", 900,   1500,   12000,  50,  0.18],
+  ["Розыгрыш каждый час",      "#ffb02e", 3600,  12000,  250000, 300, 0.10]
+];
+let raffles = [];
+let raffleIdSeq = 35900;
+
+function pickPrize(min, max){
+  const cands = SKINS.filter(s => s[3] >= min && s[3] <= max);
+  const s = cands[Math.floor(Math.random() * cands.length)] || SKINS[SKINS.length - 1];
+  return {name:s[0], emoji:s[1], rarity:s[2], value:s[3]};
+}
+function newRaffle(def){
+  return {
+    label: def[0], color: def[1], intervalSec: def[2],
+    min: def[3], max: def[4], reqCases: def[5], chance: def[6],
+    prize: pickPrize(def[3], def[4]),
+    endTime: Date.now() + def[2] * 1000,
+    joined: false,
+    code: "#" + (raffleIdSeq++),
+    winners: seedWinners(def, 6)
+  };
+}
+function seedWinners(def, n){
+  const arr = [];
+  for(let i = 0; i < n; i++){
+    const p = pickPrize(def[3], def[4]);
+    arr.push({
+      nick: NICKS[Math.floor(Math.random() * NICKS.length)],
+      av: AVATARS[Math.floor(Math.random() * AVATARS.length)],
+      skin: p.name, value: p.value,
+      code: "#" + (raffleIdSeq - 1 - i),
+      time: pastTime(i)
+    });
+  }
+  return arr;
+}
+function pastTime(stepsAgo){ return stampOf(new Date(Date.now() - stepsAgo * 7 * 60000)); }
+function nowStamp(){ return stampOf(new Date()); }
+function stampOf(d){
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mi = String(d.getMinutes()).padStart(2, "0");
+  return `${dd}.${mm}.${d.getFullYear()} ${hh}:${mi}`;
+}
+function fmtLeft(ms){
+  if(ms < 0) ms = 0;
+  const tot = Math.floor(ms / 1000);
+  const m = Math.floor(tot / 60);
+  const s = tot % 60;
+  if(m >= 60){ const h = Math.floor(m / 60); return `${h} ч ${m % 60} мин`; }
+  return `${m} мин ${s} сек`;
+}
+function initRaffles(){ raffles = RAFFLE_DEFS.map(newRaffle); }
+function renderRaffles(){
+  $("#openedStat").textContent = casesOpened;
+  const g = $("#rafflesGrid");
+  g.innerHTML = "";
+  raffles.forEach((rf, idx) => {
+    const eligible = casesOpened >= rf.reqCases;
+    const pct = Math.round(rf.chance * 100);
+    const el = document.createElement("div");
+    el.className = "raffle";
+    el.dataset.idx = idx;
+    const btnText = rf.joined
+      ? "Вы участвуете"
+      : (eligible ? "Участвовать" : `Откройте ${rf.reqCases} кейс(ов)`);
+    el.innerHTML = `
+      <div class="rhead" style="background:${rf.color}22;border-bottom:2px solid ${rf.color}">
+        <span><span style="color:${rf.color}">${rf.code}</span> ${rf.label}</span>
+        <span class="rprice" style="color:var(--accent2)">${fmt(rf.prize.value)} ₽</span>
+      </div>
+      <div class="rbody">
+        <div class="rinfo">
+          <div class="rname" style="color:${rarities[rf.prize.rarity].color}">${rf.prize.name}</div>
+          <div class="rsub">${rf.prize.rarity}</div>
+          <div class="rcond">
+            Условие: открыть <b>${rf.reqCases}</b> кейс(ов) <b>(${Math.min(casesOpened, rf.reqCases)}/${rf.reqCases})</b><br>
+            Шанс выигрыша: <span class="chance-badge" style="background:${rf.color}22;color:${rf.color}">${pct}%</span><br>
+            Осталось: <b class="rleft">${fmtLeft(rf.endTime - Date.now())}</b>
+          </div>
+        </div>
+        <div class="remoji">${rf.prize.emoji}</div>
+      </div>
+      <div class="rprog"><i class="rbar"></i></div>
+      <div class="rjoin">
+        <button class="rjoinbtn ${rf.joined ? "joined" : ""}" ${(rf.joined || !eligible) ? "disabled" : ""}>${btnText}</button>
+      </div>
+      <div class="winners">
+        <div class="wt">🏆 Победители</div>
+        <div class="wlist"></div>
+      </div>`;
+    el.querySelector(".rjoinbtn").onclick = () => joinRaffle(idx);
+    g.appendChild(el);
+    renderWinners(el.querySelector(".wlist"), rf.winners);
+  });
+  updateRaffleTimers();
+}
+function renderWinners(box, list){
+  box.innerHTML = "";
+  list.slice(0, 7).forEach(w => {
+    const r = document.createElement("div");
+    r.className = "wrow";
+    r.innerHTML = `
+      <div class="wav">${w.av}</div>
+      <div>
+        <div class="wnick">${w.nick}</div>
+        <div class="wskin">${w.skin}</div>
+      </div>
+      <div class="wmeta">
+        <div class="wtime">${w.time}<span class="wid">${w.code}</span></div>
+        <div class="wval">${fmt(w.value)} ₽</div>
+      </div>`;
+    box.appendChild(r);
+  });
+}
+function joinRaffle(idx){
+  const rf = raffles[idx];
+  if(rf.joined) return;
+  if(casesOpened < rf.reqCases){
+    toast(`Нужно открыть ${rf.reqCases} кейс(ов), чтобы участвовать`, "lose");
+    return;
+  }
+  rf.joined = true;
+  Sound.coin();
+  toast("Вы участвуете: " + rf.prize.name + " (шанс " + Math.round(rf.chance * 100) + "%)", "win");
+  renderRaffles();
+}
+function resolveRaffle(idx){
+  const rf = raffles[idx];
+  let winnerEntry;
+  if(rf.joined && Math.random() < rf.chance){
+    const got = {id: uid++, name: rf.prize.name, emoji: rf.prize.emoji, rarity: rf.prize.rarity, value: rf.prize.value};
+    inventory.push(got);
+    winnerEntry = {nick:"ВЫ", av:"⭐", skin:got.name, value:got.value, code:rf.code, time:nowStamp()};
+    Sound.bigWin();
+    toast("🎉 Вы выиграли: " + got.name + " (" + fmt(got.value) + " ₽)!", "win");
+    renderInventory();
+  } else {
+    winnerEntry = {
+      nick: NICKS[Math.floor(Math.random() * NICKS.length)],
+      av: AVATARS[Math.floor(Math.random() * AVATARS.length)],
+      skin: rf.prize.name, value: rf.prize.value, code: rf.code, time: nowStamp()
+    };
+    if(rf.joined){ Sound.lose(); toast("Розыгрыш «" + rf.prize.name + "» выиграл другой участник", "lose"); }
+  }
+  const def = RAFFLE_DEFS.find(d => d[2] === rf.intervalSec);
+  const fresh = newRaffle(def);
+  fresh.winners = [winnerEntry, ...rf.winners].slice(0, 12);
+  raffles[idx] = fresh;
+  if(!$("#tab-contests").classList.contains("hidden")) renderRaffles();
+}
+function updateRaffleTimers(){
+  $$("#rafflesGrid .raffle").forEach(el => {
+    const rf = raffles[el.dataset.idx];
+    if(!rf) return;
+    const left = rf.endTime - Date.now();
+    const leftEl = el.querySelector(".rleft");
+    if(leftEl) leftEl.textContent = fmtLeft(left);
+    const bar = el.querySelector(".rbar");
+    if(bar){
+      const pct = 100 * (1 - left / (rf.intervalSec * 1000));
+      bar.style.width = Math.max(0, Math.min(100, pct)) + "%";
+      bar.style.background = rf.color;
+    }
+  });
+}
+setInterval(() => {
+  raffles.forEach((rf, idx) => { if(Date.now() >= rf.endTime){ resolveRaffle(idx); } });
+  if(!$("#tab-contests").classList.contains("hidden")) updateRaffleTimers();
+}, 1000);
+
+/* ---------- INVENTORY ---------- */
+function renderInventory(){
+  const g = $("#invGrid");
+  g.innerHTML = "";
+  $("#invCount").textContent = inventory.length;
+  $("#invEmpty").classList.toggle("hidden", inventory.length > 0);
+  inventory.forEach(s => {
+    const el = document.createElement("div");
+    el.className = "item";
+    el.innerHTML =
+      `<div class="emoji">${s.emoji}</div>
+       <div class="nm" style="color:${rarities[s.rarity].color}">${s.name}</div>
+       <div class="val">${fmt(s.value)} ₽</div>
+       <div class="row">
+         <button class="sell-b">Продать</button>
+         <button class="up-b">Апгрейд</button>
+       </div>
+       <div class="rarity-bar" style="background:${rarities[s.rarity].color}"></div>`;
+    el.querySelector(".sell-b").onclick = () => sellItem(s.id);
+    el.querySelector(".up-b").onclick = () => gotoUpgrade(s.id);
+    g.appendChild(el);
+  });
+}
+function sellItem(id){
+  const i = inventory.findIndex(x => x.id === id);
+  if(i < 0) return;
+  setBalance(balance + inventory[i].value);
+  Sound.coin();
+  toast("Продано за " + fmt(inventory[i].value) + " ₽", "win");
+  inventory.splice(i, 1);
+  renderInventory();
+}
+$("#sellAll").onclick = () => {
+  if(!inventory.length){ toast("Инвентарь пуст"); return; }
+  const sum = inventory.reduce((a, b) => a + b.value, 0);
+  setBalance(balance + sum);
+  Sound.coin();
+  toast("Продано всё за " + fmt(sum) + " ₽", "win");
+  inventory = [];
+  renderInventory();
+};
+
+/* ---------- UPGRADE ---------- */
+let upSel = null, upTarget = null, upMult = 2, upSpinning = false;
+
+function gotoUpgrade(id){
+  $$("nav button").forEach(x => x.classList.remove("active"));
+  document.querySelector('nav button[data-tab="upgrade"]').classList.add("active");
+  ["cases","upgrade","contests","inventory"].forEach(t => $("#tab-" + t).classList.add("hidden"));
+  $("#tab-upgrade").classList.remove("hidden");
+  upSel = id;
+  upTarget = null;
+  renderUpgrade();
+}
+function setActiveMult(){
+  $("#mults").querySelectorAll("button").forEach(x =>
+    x.classList.toggle("active", parseFloat(x.dataset.m) === upMult));
+}
+function renderQuickPicks(){
+  const box = $("#quickPicks");
+  box.innerHTML = "";
+  upSettings.quickCoef.forEach(c => {
+    const b = document.createElement("button");
+    b.className = "qpk coef"; b.textContent = "x" + c;
+    b.onclick = () => { if(upSpinning) return; upMult = c; setActiveMult(); upTarget = null; renderUpgrade(); };
+    box.appendChild(b);
+  });
+  upSettings.quickPct.forEach(p => {
+    const b = document.createElement("button");
+    b.className = "qpk pct"; b.textContent = p + "%";
+    b.onclick = () => quickPickPercent(p);
+    box.appendChild(b);
+  });
+}
+function quickPickPercent(p){
+  if(upSpinning) return;
+  const src = inventory.find(x => x.id === upSel);
+  if(!src){ toast("Сначала выберите предмет слева", "lose"); return; }
+  const targetVal = src.value * 92 / p;
+  let best = null, bd = Infinity;
+  SKINS.forEach(s => {
+    if(s[3] <= src.value) return;
+    const d = Math.abs(s[3] - targetVal);
+    if(d < bd){ bd = d; best = s; }
+  });
+  if(!best){ toast("Нет подходящей цели", "lose"); return; }
+  upTarget = {name:best[0], emoji:best[1], rarity:best[2], value:best[3], id:uid++};
+  renderUpgrade();
+}
+function renderUpgrade(){
+  const inv = $("#upInv");
+  inv.innerHTML = "";
+  if(!inventory.length) inv.innerHTML = '<div class="empty">Нет предметов.<br>Откройте кейс!</div>';
+  inventory.forEach(s => {
+    const p = document.createElement("div");
+    p.className = "pick" + (s.id === upSel ? " sel" : "");
+    p.innerHTML = `<div class="e">${s.emoji}</div><div>${s.name.split("|")[0]}</div><div class="v">${fmt(s.value)} ₽</div>`;
+    p.onclick = () => { if(upSpinning) return; upSel = s.id; upTarget = null; renderUpgrade(); };
+    inv.appendChild(p);
+  });
+
+  const src = inventory.find(x => x.id === upSel);
+  const tg = $("#upTargets");
+  tg.innerHTML = "";
+  if(src){
+    const goal = src.value * upMult;
+    const cands = SKINS.map(s => ({name:s[0], emoji:s[1], rarity:s[2], value:s[3]}))
+      .filter(s => s.value >= goal * 0.7 && s.value <= goal * 1.8)
+      .sort((a, b) => a.value - b.value)
+      .slice(0, 14);
+    if(!cands.length) tg.innerHTML = '<div class="empty">Нет целей для этого множителя</div>';
+    cands.forEach(s => {
+      const isSel = upTarget && upTarget.name === s.name;
+      const p = document.createElement("div");
+      p.className = "pick" + (isSel ? " sel" : "");
+      p.innerHTML = `<div class="e">${s.emoji}</div><div>${s.name.split("|")[0]}</div><div class="v">${fmt(s.value)} ₽</div>`;
+      p.onclick = () => { if(upSpinning) return; upTarget = {...s, id: uid++}; renderUpgrade(); };
+      tg.appendChild(p);
+    });
+  } else {
+    tg.innerHTML = '<div class="empty">Сначала выберите предмет слева</div>';
+  }
+  setActiveMult();
+  updateWheel();
+}
+$("#mults").querySelectorAll("button").forEach(b => {
+  b.onclick = () => {
+    if(upSpinning) return;
+    upMult = parseFloat(b.dataset.m);
+    setActiveMult();
+    upTarget = null;
+    renderUpgrade();
+  };
+});
+function calcChance(){
+  const src = inventory.find(x => x.id === upSel);
+  if(!src || !upTarget) return 0;
+  let c = (src.value / upTarget.value) * 92;
+  return Math.max(2, Math.min(88, Math.round(c)));
+}
+function updateWheel(){
+  const chance = calcChance();
+  $("#chanceVal").textContent = chance;
+  const arc = $("#wheelArc");
+  const r = parseFloat(arc.getAttribute("r"));
+  const circ = 2 * Math.PI * r;
+  arc.setAttribute("stroke-dasharray", circ);
+  arc.style.strokeDashoffset = circ - circ * (chance / 100);
+  arc.style.stroke = chance >= 50 ? "#3ddc84" : chance >= 25 ? "#ffb02e" : "#eb4b4b";
+  $("#doUpgrade").disabled = !(upSel && upTarget && !upSpinning);
+  const src = inventory.find(x => x.id === upSel);
+  if(src && upTarget) $("#upInfo").textContent = `${fmt(src.value)} ₽ → ${fmt(upTarget.value)} ₽ · шанс ${chance}%`;
+  else $("#upInfo").textContent = "Выберите предмет и цель";
+}
+$("#doUpgrade").onclick = () => {
+  if(upSpinning) return;
+  const src = inventory.find(x => x.id === upSel);
+  if(!src || !upTarget) return;
+  Sound.init();
+  const chance = calcChance();
+  const chanceDeg = chance * 3.6;
+  const win = Math.random() * 100 < chance;
+  upSpinning = true;
+  $("#doUpgrade").disabled = true;
+  const needle = $("#needle");
+  const landAngle = win
+    ? Math.random() * (chanceDeg * 0.92)
+    : chanceDeg + Math.random() * (360 - chanceDeg);
+  const azart = upSettings.scrollType === "v2";
+  const spins = azart ? 10 : 6;
+  const dur = azart ? 5 : 3.4;
+  const easing = azart ? "cubic-bezier(.16,.74,.2,1)" : "cubic-bezier(.1,.62,.08,1)";
+  const totalDeg = spins * 360 + landAngle;
+  needle.style.transition = `transform ${dur}s ${easing}`;
+  needle.style.transform = `translateX(-50%) rotate(${totalDeg}deg)`;
+  upTicks(dur * 1000);
+  setTimeout(() => {
+    Sound.stopTicks();
+    needle.style.transition = "none";
+    needle.style.transform = `translateX(-50%) rotate(${landAngle}deg)`;
+    const i = inventory.findIndex(x => x.id === src.id);
+    if(i >= 0) inventory.splice(i, 1);
+    if(win){
+      const got = {id: uid++, name: upTarget.name, emoji: upTarget.emoji, rarity: upTarget.rarity, value: upTarget.value};
+      inventory.push(got);
+      upBeep("bigWin");
+      toast("УСПЕХ! Получен " + got.name + " (" + fmt(got.value) + " ₽)", "win");
+    } else {
+      upBeep("lose");
+      toast("Неудача. Предмет сгорел 😢", "lose");
+    }
+    upSel = null;
+    upTarget = null;
+    upSpinning = false;
+    renderUpgrade();
+    renderInventory();
+  }, dur * 1000 + 100);
+};
+
+/* ---------- НАСТРОЙКИ АПГРЕЙДА ---------- */
+function applyWheelDesign(){
+  const arc = $("#wheelArc"), bg = $("#wheelBg");
+  if(upSettings.wheelDesign === "v1"){
+    arc.setAttribute("r", "52"); arc.setAttribute("stroke-width", "104");
+    bg.setAttribute("r", "52");  bg.setAttribute("stroke-width", "104");
+  } else {
+    arc.setAttribute("r", "104"); arc.setAttribute("stroke-width", "18");
+    bg.setAttribute("r", "104");  bg.setAttribute("stroke-width", "18");
+  }
+}
+function applyNeedle(){
+  const needle = $("#needle");
+  const color = (upSettings.wheelDesign === "v2") ? NEEDLE_COLORS[upSettings.needleType] : "#fff";
+  needle.style.setProperty("--ndl", color);
+}
+function setSel(grpSel, targetSel){
+  document.querySelectorAll(grpSel + " .opt, " + grpSel + " .needle-opt")
+    .forEach(x => x.classList.remove("sel"));
+  const t = document.querySelector(grpSel + " " + targetSel);
+  if(t) t.classList.add("sel");
+}
+function bindGroup(grpSel){
+  document.querySelectorAll(grpSel + " .opt, " + grpSel + " .needle-opt").forEach(o => {
+    o.onclick = () => {
+      document.querySelectorAll(grpSel + " .opt, " + grpSel + " .needle-opt")
+        .forEach(x => x.classList.remove("sel"));
+      o.classList.add("sel");
+      if(grpSel === "#grpDesign") updateNeedleEnabled();
+    };
+  });
+}
+function updateNeedleEnabled(){
+  const designV2 = !!document.querySelector('#grpDesign .opt.sel[data-val="v2"]');
+  document.querySelectorAll("#grpNeedle .needle-opt")
+    .forEach(o => o.classList.toggle("disabled", !designV2));
+}
+function syncSettingsUI(){
+  setSel("#grpDesign", `[data-val="${upSettings.wheelDesign}"]`);
+  setSel("#grpNeedle", `[data-idx="${upSettings.needleType}"]`);
+  setSel("#grpScroll", `[data-val="${upSettings.scrollType}"]`);
+  setSel("#grpSound",  `[data-val="${upSettings.sound}"]`);
+  $("#qc0").value = upSettings.quickCoef[0];
+  $("#qc1").value = upSettings.quickCoef[1];
+  $("#qc2").value = upSettings.quickCoef[2];
+  $("#qp0").value = upSettings.quickPct[0];
+  $("#qp1").value = upSettings.quickPct[1];
+  $("#qp2").value = upSettings.quickPct[2];
+  updateNeedleEnabled();
+}
+function clampPct(v, def){ v = parseInt(v); if(isNaN(v)) return def; return Math.max(2, Math.min(95, v)); }
+function clampCoef(v, def){ v = parseFloat(v); if(isNaN(v) || v < 1.1) return def; return v; }
+function saveSettings(){
+  const d = document.querySelector("#grpDesign .opt.sel"); if(d) upSettings.wheelDesign = d.dataset.val;
+  const n = document.querySelector("#grpNeedle .needle-opt.sel"); if(n) upSettings.needleType = parseInt(n.dataset.idx);
+  const sc = document.querySelector("#grpScroll .opt.sel"); if(sc) upSettings.scrollType = sc.dataset.val;
+  const so = document.querySelector("#grpSound .opt.sel"); if(so) upSettings.sound = (so.dataset.val === "true");
+  upSettings.quickCoef = [clampCoef($("#qc0").value,2), clampCoef($("#qc1").value,5), clampCoef($("#qc2").value,10)];
+  upSettings.quickPct  = [clampPct($("#qp0").value,30), clampPct($("#qp1").value,50), clampPct($("#qp2").value,75)];
+  applyWheelDesign();
+  applyNeedle();
+  renderQuickPicks();
+  updateWheel();
+  $("#setOverlay").classList.remove("show");
+  toast("Настройки сохранены", "win");
+}
+$("#openSettings").onclick = () => { syncSettingsUI(); $("#setOverlay").classList.add("show"); };
+$("#setClose").onclick = () => $("#setOverlay").classList.remove("show");
+$("#setSave").onclick = saveSettings;
+$("#setOverlay").onclick = e => { if(e.target.id === "setOverlay") $("#setOverlay").classList.remove("show"); };
+["#grpDesign","#grpNeedle","#grpScroll","#grpSound"].forEach(bindGroup);
+
+/* ---------- INIT ---------- */
+setActiveMult();
+applyWheelDesign();
+applyNeedle();
+renderQuickPicks();
+renderCases();
+initRaffles();
+</script>
+</body>
+</html>
+
